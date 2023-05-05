@@ -1,34 +1,27 @@
-specVersion: 0.0.5
+specVersion: 0.0.4
+description: OpenSea NFT Subgraph
+repository: https://github.com/<your-github-username>/<your-subgraph-name>
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: OpenSea
+    name: NFTContract
     network: mainnet
     source:
-      address: "0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b"
-      abi: OpenSea
-      startBlock: 14140054
+      address: "0xd2E9C0896772071CfC87Aa455BcEF4A794455900"
+      abi: NFTContract
+      startBlock: 14903645
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.7
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
-        - Account
-        - Contract
-        - Transaction
-        - MarketPlace
+        - Token
+        - Transfer
       abis:
-        - name: OpenSea
-          file: ./abis/OpenSea.json
-        - name: ERC721
-          file: ./abis/ERC721.json
+        - name: NFTContract
+          file: ./abis/NFTContract.json
       eventHandlers:
-        - event: OrdersMatched(bytes32,bytes32,indexed address,indexed address,uint256,indexed bytes32)
-          handler: handleOrdersMatched
-          receipt: true
-        - event: OrderApprovedPartOne(indexed bytes32,address,indexed address,address,uint256,uint256,uint256,uint256,indexed address,uint8,uint8,uint8,address)
-          handler: handleOrderApprovedPartOne
-        - event: OrderApprovedPartTwo(indexed bytes32,uint8,bytes,bytes,address,bytes,address,uint256,uint256,uint256,uint256,uint256,bool)
-          handler: handleOrderApprovedPartTwo
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
       file: ./src/mapping.ts
