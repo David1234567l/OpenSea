@@ -1,12 +1,116 @@
-type Token @entity {
- id: ID!
- owner: Bytes!
- metadataURI: String
- }
- type Transfer @entity {
- id: ID!
- token: Token!
- from: Bytes!
- to: Bytes!
- timestamp: BigInt!
- }
+interface Event {
+  id: ID!
+  collection: Collection
+  nft: Nft
+  eventType: EventType!
+  txHash: Bytes!
+  blockHash: Bytes!
+  timestamp: BigInt!
+  logNumber: BigInt!
+  blockNumber: BigInt!
+}
+
+enum EventType {
+  SALE
+  FEE
+  AUCTION
+}
+
+type Account @entity {
+  id: ID!
+  numberOfSales: BigInt!
+  numberOfPurchases: BigInt!
+  totalSpent: BigDecimal!
+  totalEarned: BigDecimal!
+  sales: [Sale!]! @derivedFrom(field: "buyer")
+}
+
+type Collection @entity {
+  id: ID!
+  nft: Nft
+
+  totalSupply: BigInt
+  numberOfSales: BigInt!
+  totalSales: BigDecimal!
+
+  owner: Account!
+
+  events: [Event!]! @derivedFrom(field: "collection")
+  sales: [Sale!]! @derivedFrom(field: "collection")
+  feesReceived: [Fee!]! @derivedFrom(field: "feeRecipient")
+}
+
+type Nft @entity {
+  id: ID! # Collection + Token ID
+  collection: Collection
+  sale: Sale
+
+  numberOfSales: BigInt!
+  tokenID: BigInt
+  owner: Account!
+
+  events: [Event!]! @derivedFrom(field: "nft")
+}
+
+type Sale implements Event @entity {
+  id: ID!
+  sellHash: Bytes!
+  buyHash: Bytes!
+  buyer: Account!
+  seller: Account!
+  price: BigDecimal!
+  collection: Collection
+
+  nft: Nft
+
+  eventType: EventType!
+  logNumber: BigInt!
+  txHash: Bytes!
+  blockHash: Bytes!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+}
+
+type Fee implements Event @entity {
+  id: ID!
+  takerRelayerFee: BigInt
+  makerRelayerFee: BigInt
+  takerProtocolFee: BigInt
+  makerProtocolFee: BigInt
+  feeRecipient: Collection!
+  nft: Nft
+  eventType: EventType!
+  txHash: Bytes!
+  blockHash: Bytes!
+  timestamp: BigInt!
+  logNumber: BigInt!
+  blockNumber: BigInt!
+}
+
+type Auction implements Event @entity {
+  id: ID!
+  listingTime: BigInt
+  expirationTime: BigInt
+  basePrice: BigInt
+  paymentToken: PaymentToken
+  staticTarget: Bytes
+  staticExtraData: Bytes
+  collection: Collection
+  nft: Nft
+  extra: BigInt
+  hash: Bytes
+  orderbook: Boolean!
+  eventType: EventType!
+  txHash: Bytes!
+  blockHash: Bytes!
+  timestamp: BigInt!
+  logNumber: BigInt!
+  blockNumber: BigInt!
+}
+
+type PaymentToken @entity {
+  id: ID! # Payment token e.g USDC, ETH, DAI
+  address: String!
+  numberOfSales: BigInt!
+  sales: [Sale!]! @derivedFrom(field: "paymentToken")
+}
