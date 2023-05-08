@@ -1,3 +1,38 @@
+type PaymentToken @entity {
+  id: ID! #Payment token e.g USDC, ETH, DAI
+  symbol: String
+  name: String
+  address: String!
+  decimals: BigInt
+  numberOfSales: BigInt!
+  sales: [Sale!]! @derivedFrom(field: "paymentToken")
+}
+
+enum EventType {
+  SALE
+  FEE
+  AUCTION
+}
+
+type Nft @entity {
+  id: ID! #Collection + Token ID
+  collection: Collection
+  symbol: String
+  sale: Sale
+  numberOfSales: BigInt!
+  totalSales: BigInt
+  tokenID: BigInt
+  owner: Account!
+  "All events"
+  events: [Event!]! @derivedFrom(field: "nft")
+}
+
+type Contract @entity {
+  id: ID!
+  version: String
+  codename: String
+}
+
 interface Event {
   id: ID!
   collection: Collection
@@ -10,61 +45,26 @@ interface Event {
   blockNumber: BigInt!
 }
 
-enum EventType {
-  SALE
-  FEE
-  AUCTION
-}
-
-# enum NetworkType{
-#   MAINNET
-#   POLYGON
-# }
-
 type Account @entity {
   id: ID!
   numberOfSales: BigInt!
   numberOfPurchases: BigInt!
   totalSpent: BigDecimal!
   totalEarned: BigDecimal!
-  #nftOwnedAndCollection: [String!]!
   sales: [Sale!]! @derivedFrom(field: "buyer")
-}
-type Contract @entity {
-  id: ID!
-  version: String
-  codename: String
+  #nftOwnedAndCollection: [String!]!
 }
 
 type Collection @entity {
   id: ID!
   nft: Nft
-
   totalSupply: BigInt
   numberOfSales: BigInt!
   totalSales: BigDecimal!
-
   owner: Account!
-
   event: [Event!]! @derivedFrom(field: "collection")
   sales: [Sale!]! @derivedFrom(field: "collection")
-  feesReceived: [Fee!]! @derivedFrom(field: "feeRecipient")
-}
-
-type Nft @entity {
-  id: ID! #Collection + Token ID
-  collection: Collection
-  symbol: String
-  sale: Sale
-
-  numberOfSales: BigInt!
-  totalSales: BigInt
-
-  tokenID: BigInt
-  owner: Account!
-
-  "All events"
-  events: [Event!]! @derivedFrom(field: "nft")
+  feesReceived: [Fee!]! @derivedFrom(field: "feeRecipient") 
 }
 
 type Sale implements Event @entity {
@@ -76,9 +76,7 @@ type Sale implements Event @entity {
   price: BigDecimal!
   paymentToken: PaymentToken
   collection: Collection
-
   nft: Nft
-
   eventType: EventType!
   logNumber: BigInt!
   txHash: Bytes!
@@ -94,7 +92,7 @@ type Fee implements Event @entity {
   takerProtocolFee: BigInt
   makerProtocolFee: BigInt
   feeRecipient: Collection!
-  collection: Collection #Check if this is to a collection
+  collection: Collection
   nft: Nft
   eventType: EventType!
   txHash: Bytes!
@@ -123,14 +121,4 @@ type Auction implements Event @entity {
   timestamp: BigInt!
   logNumber: BigInt!
   blockNumber: BigInt!
-}
-
-type PaymentToken @entity {
-  id: ID! #Payment token e.g USDC, ETH, DAI
-  symbol: String
-  name: String
-  address: String!
-  decimals: BigInt
-  numberOfSales: BigInt!
-  sales: [Sale!]! @derivedFrom(field: "paymentToken")
 }
