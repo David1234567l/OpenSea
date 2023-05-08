@@ -8,12 +8,6 @@ type PaymentToken @entity {
   sales: [Sale!]! @derivedFrom(field: "paymentToken")
 }
 
-enum EventType {
-  SALE
-  FEE
-  AUCTION
-}
-
 type Nft @entity {
   id: ID! #Collection + Token ID
   collection: Collection
@@ -31,18 +25,6 @@ type Contract @entity {
   id: ID!
   version: String
   codename: String
-}
-
-interface Event {
-  id: ID!
-  collection: Collection
-  nft: Nft
-  eventType: EventType!
-  txHash: Bytes!
-  blockHash: Bytes!
-  timestamp: BigInt!
-  logNumber: BigInt!
-  blockNumber: BigInt!
 }
 
 type Account @entity {
@@ -65,6 +47,24 @@ type Collection @entity {
   event: [Event!]! @derivedFrom(field: "collection")
   sales: [Sale!]! @derivedFrom(field: "collection")
   feesReceived: [Fee!]! @derivedFrom(field: "feeRecipient") 
+} 
+
+enum EventType {
+  SALE
+  FEE
+  AUCTION
+}
+
+interface Event {
+  id: ID!
+  collection: Collection
+  nft: Nft
+  eventType: EventType!
+  txHash: Bytes!
+  blockHash: Bytes!
+  timestamp: BigInt!
+  logNumber: BigInt!
+  blockNumber: BigInt!
 }
 
 type Sale implements Event @entity {
